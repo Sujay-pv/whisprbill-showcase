@@ -16,7 +16,7 @@
 
 ---
 
-> ⚠️ **This is a public showcase repository.** The production source code (frontend, app, backend) lives in private repositories. This repo contains architecture documentation, engineering decision writeups, and feature breakdowns intended for technical audiences — recruiters, collaborators, and senior engineers.
+>  **This is a public showcase repository.** The production source code (frontend, app, backend) lives in private repositories. This repo contains architecture documentation, engineering decision writeups, and feature breakdowns intended for technical audiences — recruiters, collaborators, and senior engineers.
 
 ---
 
@@ -54,21 +54,21 @@ The product is live at [app.whisprbill.com](https://app.whisprbill.com).
 
 ```
                         ┌─────────────────────────────────────┐
-                        │           CLIENT LAYER               │
-                        │  whisprbill.com   app.whisprbill.com │
-                        │  (Next.js SSG)    (React SPA)        │
-                        └────────────┬────────────────┬────────┘
+                        │           CLIENT LAYER              │
+                        │  whisprbill.com   app.whisprbill.com│
+                        │  (Next.js SSG)    (React SPA)       │
+                        └────────────┬────────────────┬───────┘
                                      │                │
                               Vercel India        Vercel India
                                      │                │
-                        ┌────────────▼────────────────▼────────┐
+                        ┌────────────▼────────────────▼─────────┐
                         │         API LAYER (Express.js)        │
                         │         api.whisprbill.com            │
                         │         AWS EC2 ap-south-1            │
                         │                                       │
-                        │  ┌──────────┐  ┌──────────────────┐  │
-                        │  │Auth MW   │  │ Rate Limiter (IP) │  │
-                        │  └──────────┘  └──────────────────┘  │
+                        │  ┌──────────┐  ┌──────────────────┐   │
+                        │  │ Auth MW  │  │ Rate Limiter (IP)│   │
+                        │  └──────────┘  └──────────────────┘   │
                         │  ┌──────────────────────────────────┐ │
                         │  │ Route → Service → Domain Model   │ │
                         │  │ + Ownership checks per companyId │ │
@@ -76,8 +76,8 @@ The product is live at [app.whisprbill.com](https://app.whisprbill.com).
                         └──────┬──────────────────┬─────────────┘
                                │                  │
                     ┌──────────▼──────┐   ┌───────▼──────────┐
-                    │   MongoDB       │   │  Groq API         │
-                    │   (Primary DB)  │   │  (AI / LLM)       │
+                    │   MongoDB       │   │  Groq API        │
+                    │   (Primary DB)  │   │  (AI / LLM)      │
                     └─────────────────┘   └──────────────────┘
                                │
                     ┌──────────▼──────┐
@@ -109,16 +109,16 @@ User Input (text / voice / manual)
         │
         ▼
   ┌─────────────┐     ┌──────────────────┐     ┌──────────────────┐
-  │ promptBuilder│────▶│  Groq API        │────▶│responseGenerator │
+  │promptBuilder│───▶ │  Groq API        │───▶│responseGenerator │
   └─────────────┘     │  (aiInterpreter) │     └────────┬─────────┘
                       └──────────────────┘              │
                                                 Structured JSON
                                                         │
-                                            ┌───────────▼───────────┐
+                                            ┌───────────▼────────────┐
                                             │  Backend Business Logic│
                                             │  Taxes · Totals ·      │
                                             │  Validation · DB Write │
-                                            └───────────────────────┘
+                                            └────────────────────────┘
 ```
 
 The orchestrator pattern (`promptBuilder`, `aiInterpreter`, `responseGenerator`) was a deliberate architectural choice to keep AI concerns fully isolated from financial logic. The AI can do full CRUD on invoices, customers, and inventory through natural language — but it never *executes* those operations itself.
@@ -274,21 +274,6 @@ whisprbill-showcase/
     ├── invoice-creation.png
     └── ai-chat.png
 ```
-
----
-
-## Team
-
-Built by a two-person team.
-
-| Contributor | Primary Areas |
-|---|---|
-| **[Your Name]** | Landing page (Next.js + SEO), App frontend (React), Manual invoice creation flow (E2E), Customer management (E2E), Public invoice sharing (E2E), Bulk import/export, AI orchestrator architecture input |
-| **[Teammate's Name]** | AI pipeline, Groq integration, AI orchestrator implementation, backend enhancements |
-
-*Both contributors have worked across the stack. The above reflects primary ownership, not exclusive contribution.*
-
----
 
 ## Live Links
 
