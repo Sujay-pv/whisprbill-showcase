@@ -42,7 +42,7 @@ The product is live at [app.whisprbill.com](https://app.whisprbill.com).
 | **AI Provider** | Groq API | Zero data retention policy, no model training on user data, and significantly lower per-invoice cost than alternatives |
 | **Payments** | Razorpay | India-first payment gateway, UPI + cards |
 | **PDF Engine** | Puppeteer + Handlebars | Dynamic HTML templating rendered to PDF server-side |
-| **Frontend Hosting** | Vercel (India edge) | Native Next.js support, fast Indian PoP |
+| **Frontend Hosting** | Vercel and Netlify (India edge) | Native Next.js support, fast Indian PoP |
 | **Backend Hosting** | AWS EC2 `ap-south-1` (Mumbai) | Low latency for Indian users, data residency in India |
 | **CI/CD** | GitHub Actions + Docker + AWS ECR | Containerised deployments, clean image promotion |
 
@@ -59,7 +59,7 @@ The product is live at [app.whisprbill.com](https://app.whisprbill.com).
                         │  (Next.js SSG)    (React SPA)       │
                         └────────────┬────────────────┬───────┘
                                      │                │
-                              Vercel India        Vercel India
+                              Vercel India        Netlify India
                                      │                │
                         ┌────────────▼────────────────▼─────────┐
                         │         API LAYER (Express.js)        │
@@ -87,6 +87,46 @@ The product is live at [app.whisprbill.com](https://app.whisprbill.com).
 ```
 
 **All data is hosted within India.** The backend, database, and auth provider all operate in Indian regions, satisfying data residency requirements for Indian business customers.
+
+## CI/CD & Deployment Pipeline
+
+The backend follows a fully containerised deployment pipeline with zero-touch deploys on every push to `main`.
+
+```
+Developer Push (main branch)
+        │
+        ▼
+┌───────────────────┐
+│  GitHub Actions   │  ← Triggered on push
+│  Workflow         │
+└────────┬──────────┘
+         │
+         ▼
+┌───────────────────┐
+│  Docker Build     │  ← Builds production image
+│  (Dockerfile)     │
+└────────┬──────────┘
+         │
+         ▼
+┌───────────────────┐
+│  AWS ECR          │  ← Image pushed to Elastic Container Registry
+│  (ap-south-1)     │     with commit SHA tag
+└────────┬──────────┘
+         │
+         ▼
+┌───────────────────┐
+│  AWS EC2          │  ← Instance pulls latest image from ECR
+│  (Mumbai)         │     and restarts the container
+└───────────────────┘
+```
+
+**How it works:**
+- Every merge to `main` triggers a GitHub Actions workflow
+- The workflow builds a Docker image and pushes it to **AWS ECR** tagged with the commit SHA
+- The EC2 instance pulls the new image and performs a rolling container restart
+- The frontend deploys automatically via **Vercel's Git integration** on push — no workflow needed
+
+This gives the backend a clean, reproducible build environment and makes rollbacks trivial — just redeploy a previous ECR image tag.
 
 ---
 
