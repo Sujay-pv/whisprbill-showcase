@@ -2,31 +2,33 @@
 
 <img src="./screenshots/logo.png" alt="WhisprBill Logo" width="180" />
 
-# WhisprBill — Showcase Repository
+# WhisprBill - Showcase Repository
 
 ### AI-powered GST-compliant invoicing platform for Indian businesses
 
-[![Live App](https://img.shields.io/badge/Live%20App-app.whisprbill.com-0072E9?style=for-the-badge&logo=vercel)](https://app.whisprbill.com)
-[![Landing](https://img.shields.io/badge/Landing-whisprbill.com-012652?style=for-the-badge&logo=next.js)](https://whisprbill.com)
-[![Stack](https://img.shields.io/badge/Stack-MERN%20%2B%20Next.js-26363E?style=for-the-badge&logo=mongodb)](https://whisprbill.com)
-[![Hosting](https://img.shields.io/badge/Backend-AWS%20Mumbai-FF9900?style=for-the-badge&logo=amazonaws)](https://whisprbill.com)
-[![Frontend](https://img.shields.io/badge/Frontend-Vercel%20India-black?style=for-the-badge&logo=vercel)](https://whisprbill.com)
+<p>
+  <a href="https://whisprbill.com">Landing</a> •
+  <a href="https://app.whisprbill.com">App</a> 
+</p>
 
 </div>
 
 ---
 
->  **This is a public showcase repository.** The production source code (frontend, app, backend) lives in private repositories. This repo contains architecture documentation, engineering decision writeups, and feature breakdowns intended for technical audiences — recruiters, collaborators, and senior engineers.
+>  **This is a public showcase repository.** The production codebase is private.
+  This repo focuses on architecture, engineering decisions, and system design for WhisprBill.
 
 ---
 
 ## What is WhisprBill?
 
-WhisprBill is a production-grade, multi-tenant SaaS invoicing platform built specifically for Indian businesses. It handles the full invoicing lifecycle — from AI-assisted invoice creation to GST compliance, PDF generation, payment tracking, and business analytics — all in one place.
+WhisprBill is a multi-tenant SaaS invoicing platform built for Indian businesses.
 
-The product is live at [app.whisprbill.com](https://app.whisprbill.com).
+It supports the full invoicing workflow, from AI-assisted invoice creation to GST-compliant document generation, payment tracking, and analytics.
 
-**The core insight:** Most Indian SMBs struggle with GST compliance, manual data entry, and fragmented tools. WhisprBill collapses that into a single, intelligent workflow.
+The product is live at https://app.whisprbill.com.
+
+The core problem it addresses is reducing manual effort and compliance friction for small and medium businesses handling GST-based invoicing.
 
 ---
 
@@ -124,34 +126,36 @@ Developer Push (main branch)
 - Every merge to `main` triggers a GitHub Actions workflow
 - The workflow builds a Docker image and pushes it to **AWS ECR** tagged with the commit SHA
 - The EC2 instance pulls the new image and performs a rolling container restart
-- The frontend deploys automatically via **Vercel's Git integration** on push — no workflow needed
+- The frontend deploys automatically via **Vercel's Git integration** on push, no workflow needed
 
-This gives the backend a clean, reproducible build environment and makes rollbacks trivial — just redeploy a previous ECR image tag.
+This gives the backend a clean, reproducible build environment and makes rollbacks trivial, just redeploy a previous ECR image tag.
 
 ---
 
 ## Engineering Highlights
 
-These are specific technical decisions worth examining. Each has a dedicated writeup in [`/engineering-decisions`](./engineering-decisions/).
+These decisions reflect how the system is designed today, along with known tradeoffs and future improvements.
+
+Key technical decisions in WhisprBill. Detailed writeups will be available in  [`/engineering-decisions`](./engineering-decisions/).
 
 ---
 
-### 1. AI as a Parser, Never as Logic
+### 1. AI as a Parser, Not Business Logic
 
-**The problem:** LLMs are non-deterministic. In a financial application, you cannot let an AI decide tax rates, totals, or validation rules.
+**Problem:** LLMs are non-deterministic. In a financial system, they cannot be trusted to handle tax calculations, totals, or validation.
 
-**The decision:** The AI layer is strictly an **intent parser and entity extractor**. It receives user input (text, voice, or structured fields), classifies intent, and returns structured JSON. From that point, the backend handles everything deterministically — GST calculations, totals, discount logic, validation, and DB writes.
+**Decision:** The AI layer is used only for intent parsing and entity extraction. It converts user input into structured JSON. All financial logic - GST calculation, totals, validation, and persistence is handled by deterministic backend code.
 
-**The architecture:**
+**Flow:** 
 
 ```
 User Input (text / voice / manual)
         │
         ▼
-  ┌─────────────┐     ┌──────────────────┐     ┌──────────────────┐
-  │promptBuilder│───▶ │  Groq API        │───▶│responseGenerator │
-  └─────────────┘     │  (aiInterpreter) │     └────────┬─────────┘
-                      └──────────────────┘              │
+  ┌─────────────┐      ┌──────────────────┐     ┌──────────────────┐
+  │promptBuilder│───▶ │  Groq API         |───▶│responseGenerator │
+  └─────────────┘      │  (aiInterpreter) │     └────────┬─────────┘
+                       └──────────────────┘              │
                                                 Structured JSON
                                                         │
                                             ┌───────────▼────────────┐
@@ -211,28 +215,30 @@ This ensures exactly-once semantics on payment state transitions even under retr
 
 ---
 
-### 6. Groq as AI Provider — A Cost-First Decision
+### 6. AI Provider Selection (Groq)
 
-This was a deliberate **product decision, not just a tech one**. The per-invoice AI cost at scale matters more than prestige of provider. Groq offered:
-- Significantly lower inference cost vs. OpenAI/Anthropic
-- **Zero data retention** and no training on customer data — critical for a financial SaaS
-- Fast inference (important for a chat-like AI invoice flow)
+This was primarily a product decision.
 
-The goal was never to build the most architecturally impressive system — it was to build something users can afford to use repeatedly. Reducing per-invoice AI cost directly impacts pricing strategy.
+- Lower inference cost compared to alternatives
+- Zero data retention and no training on user data
+- Fast response times for chat-like workflows
+
+The focus was to keep per-invoice AI cost low, making the product viable at scale.
 
 ---
 
-### 7. SSG Landing Page for SEO (Next.js on Vercel)
+### 7. SSG Landing Page (Next.js on Vercel)
 
-The marketing site (`whisprbill.com`) is fully separate from the app (`app.whisprbill.com`) and is built with **Next.js using Static Site Generation (SSG)**. Every page is pre-rendered at build time, giving optimal Core Web Vitals and crawlability.
+The marketing site (`whisprbill.com`) is built with Next.js using Static Site Generation.
 
-This was a deliberate call to not bundle the landing and app — they have entirely different performance, SEO, and deployment requirements.
+The app (`app.whisprbill.com`) is separate, since it has different performance and deployment requirements.
 
+SSG improves SEO, load performance, and Core Web Vitals for the marketing layer.
 ---
 
 ## Feature Breakdown
 
-### 🧾 Invoicing
+###  Invoicing
 - Manual invoice creation with full field control
 - AI-assisted invoice creation via text, voice, or hybrid input
 - GST-compliant invoices (CGST / SGST / IGST) with automatic tax calculation
@@ -240,22 +246,22 @@ This was a deliberate call to not bundle the landing and app — they have entir
 - PDF generation with custom Handlebars templates
 - Public invoice sharing via shareable link (no login required for recipient)
 
-### 🤖 AI & Productivity
+###  AI & Productivity
 - Natural language CRUD on invoices, customers, and inventory
 - Voice input support for invoice creation
 - Intent classification (`aiInterpreter`) + natural language responses
 - AI productivity dashboard tab (time saved, invoices generated via AI)
 
-### 👥 Customer & Inventory Management
+###  Customer & Inventory Management
 - Full customer management (create, update, bulk import via Excel)
 - Inventory management with bulk Excel import/export
 - Automatic HSN + GST slab assignment on inventory items
 
-### 🏢 Multi-Company Support
+###  Multi-Company Support
 - One user account can manage multiple business profiles / GSTINs
 - Full data isolation between companies via companyId middleware
 
-### 📊 Dashboard & Analytics
+###  Dashboard & Analytics
 5-tab analytics dashboard covering:
 - **Financials** — revenue, outstanding, paid invoices
 - **Profitability** — margin trends
@@ -263,7 +269,7 @@ This was a deliberate call to not bundle the landing and app — they have entir
 - **Operations** — invoice volume, status breakdown
 - *(+ more tabs in development)*
 
-### 🔐 Security
+###  Security
 - Google OAuth + email auth via Supabase
 - Two-Factor Authentication (2FA)
 - Webhook signature verification (Razorpay)
@@ -271,7 +277,7 @@ This was a deliberate call to not bundle the landing and app — they have entir
 - Idempotent payment processing
 - All data hosted in India
 
-### 💳 Payments
+###  Payments
 - Razorpay integration for subscription billing
 - Transactional webhook handling with idempotency
 
@@ -292,7 +298,7 @@ These are scoped and actively in development — not wishlist items:
 
 ---
 
-## Repository Structure
+## Repository Structure (In progress)
 
 ```
 whisprbill-showcase/
@@ -317,10 +323,8 @@ whisprbill-showcase/
 
 ## Live Links
 
-| | |
-|---|---|
-| 🌐 Landing | [whisprbill.com](https://whisprbill.com) |
-| 🚀 App | [app.whisprbill.com](https://app.whisprbill.com) |
+- https://whisprbill.com
+- https://app.whisprbill.com
 
 ---
 
