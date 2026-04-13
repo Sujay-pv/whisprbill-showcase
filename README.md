@@ -66,8 +66,10 @@ Detailed writeups:
 
 - [`AI as Parser`](./engineering-decisions/ai-as-parser-not-logic.md)  
 - [`PDF Storage Strategy`](./engineering-decisions/pdf-storage.md)  
-- [`Webhook Idempotency`](./engineering-decisions/webhook-idempotency.md)  
+- [`Webhook Idempotency`](./engineering-decisions/payment-webhook-handling.md)  
 - [`MongoDB Schema Design`](./engineering-decisions/mongodb-schema-design.md)  
+
+
 
 ---
 
