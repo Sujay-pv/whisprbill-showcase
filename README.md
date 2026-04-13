@@ -65,7 +65,7 @@ See full diagrams in [`/architecture`](./architecture/)
 Detailed writeups:
 
 - [`AI as Parser`](./engineering-decisions/ai-as-parser-not-logic.md)  
-- [`PDF Storage Strategy`](./engineering-decisions/pdf-blob-vs-s3.md)  
+- [`PDF Storage Strategy`](./engineering-decisions/pdf-storage.md)  
 - [`Webhook Idempotency`](./engineering-decisions/webhook-idempotency.md)  
 - [`MongoDB Schema Design`](./engineering-decisions/mongodb-schema-design.md)  
 
